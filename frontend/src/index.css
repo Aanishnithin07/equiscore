@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .glass-card {
+    @apply bg-white/[0.04] backdrop-blur-[12px] border border-border-subtle rounded-2xl;
+  }
+}
