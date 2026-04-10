@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from api.v1.routes import evaluation, leaderboard
+from api.v1.routes import evaluation, leaderboard, behavior
 
 # ── V1 Router ─────────────────────────────────────────────────────────────
 # Aggregates all v1 route modules under the /api/v1 prefix.
@@ -16,4 +16,8 @@ v1_router.include_router(
 v1_router.include_router(
     leaderboard.router,
     tags=["Leaderboard"],
+)
+v1_router.include_router(
+    behavior.router,
+    tags=["Behavior"],
 )
