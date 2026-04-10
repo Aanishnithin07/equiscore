@@ -1,0 +1,45 @@
+# EquiScore Backend Dependencies — Pinned Versions
+# ================================================
+
+# --- Web Framework ---
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.19
+
+# --- Database ---
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+alembic==1.14.1
+
+# --- Redis ---
+redis==5.2.1
+
+# --- Task Queue ---
+celery[redis]==5.4.0
+
+# --- AI / LLM ---
+openai==1.58.1
+
+# --- File Parsing ---
+PyMuPDF==1.25.1
+python-pptx==1.0.2
+
+# --- PDF Generation ---
+weasyprint==63.1
+
+# --- Validation & Config ---
+pydantic==2.10.4
+pydantic-settings==2.7.1
+
+# --- Logging ---
+structlog==24.4.0
+
+# --- HTTP (for tests & internal) ---
+httpx==0.28.1
+
+# --- Testing ---
+pytest==8.3.4
+pytest-asyncio==0.25.0
+
+# --- Utilities ---
+python-magic==0.4.27

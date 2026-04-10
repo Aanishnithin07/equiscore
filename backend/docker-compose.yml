@@ -1,0 +1,108 @@
+# EquiScore Docker Compose — Development Environment
+# ====================================================
+# Services:
+#   - api: FastAPI application (uvicorn)
+#   - celery_worker: Celery worker for async evaluation tasks
+#   - postgres: PostgreSQL 16 database
+#   - redis: Redis for Celery broker, result backend, and caching
+#
+# Usage:
+#   docker compose up --build        # Start all services
+#   docker compose up -d             # Start in background
+#   docker compose logs -f api       # Follow API logs
+#   docker compose down -v           # Stop and remove volumes
+
+services:
+  # ── PostgreSQL 16 ───────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: equiscore-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: equiscore
+      POSTGRES_USER: equiscore
+      POSTGRES_PASSWORD: equiscore_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U equiscore"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis ───────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: equiscore-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── FastAPI Application ─────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: equiscore-api
+    restart: unless-stopped
+    command: >
+      uvicorn main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+      --log-level info
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://equiscore:equiscore_dev_password@postgres:5432/equiscore
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ── Celery Worker ───────────────────────────────────────────────────
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: equiscore-celery-worker
+    restart: unless-stopped
+    command: >
+      celery -A tasks.celery_app:celery_app worker
+      --loglevel=info
+      --concurrency=2
+      --queues=evaluations,celery
+      -n equiscore-worker@%h
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://equiscore:equiscore_dev_password@postgres:5432/equiscore
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
