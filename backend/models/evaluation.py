@@ -23,6 +23,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    LargeBinary,
     func,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
@@ -78,6 +79,12 @@ class Team(Base):
         Enum(TrackType, name="track_type", create_constraint=True),
         nullable=False,
         comment="Hackathon track the team is competing in",
+    )
+    hackathon_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("hackathons.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     submission_time: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -181,6 +188,12 @@ class Evaluation(Base):
         cascade="all, delete-orphan",
         lazy="selectin",
     )
+    report_jobs: Mapped[list["ReportJob"]] = relationship(
+        "ReportJob",
+        back_populates="evaluation",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
 
     def __repr__(self) -> str:
         return f"<Evaluation(job_id='{self.job_id}', status='{self.status.value}')>"
@@ -213,6 +226,35 @@ class BehaviorJob(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
 
     evaluation: Mapped["Evaluation"] = relationship("Evaluation", back_populates="behavior_jobs")
+
+
+# ── ReportJob Model ──────────────────────────────────────────────────────
+class ReportJob(Base):
+    """
+    Tracks the asynchronous generation of the Personalized Growth Report PDF.
+    """
+    __tablename__ = "report_jobs"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+        server_default=func.gen_random_uuid(),
+    )
+    evaluation_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("evaluations.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    status: Mapped[str] = mapped_column(String, default="pending", index=True)
+    pdf_bytes: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    generated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    evaluation: Mapped["Evaluation"] = relationship("Evaluation", back_populates="report_jobs")
 
 
 # ── RubricScore Model ────────────────────────────────────────────────────

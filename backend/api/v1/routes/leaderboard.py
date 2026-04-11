@@ -19,6 +19,10 @@ from fastapi import APIRouter, Depends, Query
 from redis.asyncio import Redis
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+import uuid
+
+from core.permissions import require_role, get_current_hackathon_id
+from models.user import User
 
 from core.dependencies import get_db, get_redis
 from models.evaluation import Evaluation, EvaluationStatus, Team, TrackType
@@ -61,6 +65,8 @@ async def get_leaderboard(
     ),
     db: AsyncSession = Depends(get_db),
     redis: Redis = Depends(get_redis),
+    user: User = Depends(require_role("organizer", "judge")),
+    hackathon_id: uuid.UUID = Depends(get_current_hackathon_id),
 ) -> LeaderboardResponse:
     """
     Retrieve the ranked leaderboard of completed evaluations.
@@ -80,7 +86,7 @@ async def get_leaderboard(
     """
     # ── Build Redis cache key ─────────────────────────────────────────
     track_key = track.value if track else "all"
-    cache_key = f"leaderboard:{track_key}:{limit}:{offset}"
+    cache_key = f"leaderboard:{hackathon_id}:{track_key}:{limit}:{offset}"
 
     # ── Check cache ───────────────────────────────────────────────────
     try:
@@ -97,6 +103,7 @@ async def get_leaderboard(
     base_query = (
         select(Evaluation, Team)
         .join(Team, Evaluation.team_id == Team.id)
+        .where(Team.hackathon_id == hackathon_id)
         .where(Evaluation.status == EvaluationStatus.COMPLETED)
         .where(Evaluation.overall_score.is_not(None))
     )
@@ -106,6 +113,7 @@ async def get_leaderboard(
         select(func.count())
         .select_from(Evaluation)
         .join(Team, Evaluation.team_id == Team.id)
+        .where(Team.hackathon_id == hackathon_id)
         .where(Evaluation.status == EvaluationStatus.COMPLETED)
         .where(Evaluation.overall_score.is_not(None))
     )

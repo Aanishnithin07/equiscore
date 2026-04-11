@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page {
+    size: A4;
+    margin: 20mm;
+    @bottom-center {
+      content: "Confidential — {{ team_name }} | Page " counter(page) " of " counter(pages);
+      font-size: 8pt;
+      color: #666680;
+      font-family: 'Helvetica', sans-serif;
+    }
+  }
+
+  /* Exclude cover page footer logic manually using page classes if possible or hide it */
+  @page cover {
+    margin: 0;
+    @bottom-center {
+      content: "";
+    }
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Helvetica', 'Arial', sans-serif; /* System fonts standard fallback */
+    color: #1A1A2E;
+    font-size: 10pt;
+    line-height: 1.6;
+    background-color: #ffffff;
+  }
+
+  h1 { font-size: 26pt; font-weight: bold; color: #2D1B8E; margin-bottom: 5mm; letter-spacing: 0.2em; text-align: center; }
+  h2 { font-size: 16pt; font-weight: 600; color: #2D1B8E; text-transform: uppercase; letter-spacing: 1px; margin-top: 15mm; margin-bottom: 5mm; border-bottom: 1px solid #E0E0F0; padding-bottom: 2mm;}
+  h3 { font-size: 12pt; font-weight: 600; color: #1A1A2E; margin-top: 5mm; margin-bottom: 2mm; }
+  
+  .primary       { color: #2D1B8E; }
+  .secondary     { color: #00A88A; }
+  .danger        { color: #C0392B; }
+  .muted         { color: #666680; }
+  
+  /* COVER PAGE */
+  .cover-page {
+    page: cover;
+    height: 297mm;
+    width: 210mm;
+    box-sizing: border-box;
+    padding: 20mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .cover-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .cover-logo {
+    width: 40mm;
+    height: auto;
+  }
+
+  #logo-placeholder {
+    width: 40mm;
+    height: 15mm;
+    background-color: #2D1B8E;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10pt;
+    font-weight: bold;
+    border-radius: 4px;
+    line-height: 15mm;
+    text-align: center;
+  }
+
+  .cover-header-right {
+    text-align: right;
+    font-size: 10pt;
+    color: #666680;
+  }
+
+  .cover-center {
+    text-align: center;
+    margin-top: 50mm;
+  }
+
+  .track-badge {
+    display: inline-block;
+    background-color: #F8F7FF;
+    color: #2D1B8E;
+    border: 1px solid #2D1B8E;
+    border-radius: 20px;
+    padding: 3mm 8mm;
+    font-size: 12pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-top: 5mm;
+    margin-bottom: 15mm;
+  }
+
+  .separator-gradient {
+    height: 2px;
+    background: linear-gradient(to right, #2D1B8E, #00A88A);
+    margin: 10mm auto;
+    width: 60%;
+  }
+
+  .score-wrapper {
+    margin: 20mm auto;
+    width: 60mm;
+    height: 60mm;
+    position: relative;
+  }
+
+  .score-label {
+    margin-top: 2mm;
+    font-size: 14pt;
+    color: #666680;
+    font-weight: bold;
+  }
+
+  .cover-footer {
+    text-align: center;
+    font-size: 9pt;
+    color: #666680;
+    margin-top: 60mm;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  /* SUMMARY PAGE */
+  .quote-block {
+    background-color: #F8F7FF;
+    border-left: 4px solid #2D1B8E;
+    padding: 5mm;
+    margin-bottom: 10mm;
+    font-style: italic;
+    font-size: 11pt;
+  }
+
+  .cols-2 {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .col {
+    display: table-cell;
+    width: 50%;
+    padding-right: 5mm;
+    vertical-align: top;
+  }
+
+  .col-right {
+    padding-right: 0;
+    padding-left: 5mm;
+    border-left: 1px solid #E0E0F0;
+  }
+
+  .list-strengths, .list-weaknesses {
+    list-style-type: none;
+    padding-left: 0;
+  }
+
+  .list-strengths li {
+    margin-bottom: 3mm;
+    position: relative;
+    padding-left: 6mm;
+  }
+
+  .list-strengths li::before {
+    content: "✓";
+    color: #00A88A;
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+  }
+
+  .list-weaknesses li {
+    margin-bottom: 3mm;
+    position: relative;
+    padding-left: 6mm;
+  }
+
+  .list-weaknesses li::before {
+    content: "→";
+    color: #C0392B;
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+  }
+
+  .audit-note {
+    font-size: 8pt;
+    font-style: italic;
+    color: #666680;
+    margin-top: 15mm;
+    border-top: 1px dashed #E0E0F0;
+    padding-top: 2mm;
+  }
+
+  /* RUBRIC PAGE */
+  .rubric-row {
+    margin-bottom: 5mm;
+    border-bottom: 1px dashed #E0E0F0;
+    padding-bottom: 5mm;
+  }
+  .rubric-row:last-child {
+    border-bottom: none;
+  }
+
+  .rubric-header {
+    display: table;
+    width: 100%;
+    margin-bottom: 2mm;
+  }
+  .rubric-title {
+    display: table-cell;
+    font-weight: bold;
+    font-size: 11pt;
+  }
+  .rubric-meta {
+    display: table-cell;
+    text-align: right;
+  }
+  .rubric-weight {
+    color: #666680;
+    font-size: 9pt;
+    margin-right: 2mm;
+  }
+  .rubric-score {
+    color: #2D1B8E;
+    font-weight: bold;
+    font-size: 11pt;
+  }
+
+  .bar-bg {
+    width: 100%;
+    height: 8px;
+    background-color: #E0E0F0;
+    border-radius: 4px;
+    margin-bottom: 2mm;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+  }
+
+  .rubric-justification {
+    font-size: 9pt;
+    font-style: italic;
+    color: #1A1A2E;
+  }
+
+  .overall-justification {
+    background-color: #F8F7FF;
+    border-radius: 6px;
+    padding: 8mm;
+    margin-top: 10mm;
+    border: 1px solid #E0E0F0;
+  }
+
+  /* ACTION PLAN PAGE */
+  .action-plan-intro {
+    font-size: 11pt;
+    margin-bottom: 10mm;
+  }
+
+  .action-item {
+    margin-bottom: 10mm;
+  }
+
+  .action-title {
+    font-size: 12pt;
+    font-weight: bold;
+    color: #2D1B8E;
+  }
+
+  .category-badge {
+    display: inline-block;
+    background-color: #2D1B8E;
+    color: white;
+    font-size: 8pt;
+    padding: 1mm 3mm;
+    border-radius: 3px;
+    margin-left: 3mm;
+    vertical-align: middle;
+    text-transform: uppercase;
+  }
+
+  .action-resources {
+    margin-top: 3mm;
+    background-color: #F8F7FF;
+    padding: 3mm;
+    border-radius: 4px;
+  }
+  .action-resources strong {
+    font-size: 9pt;
+    color: #2D1B8E;
+    display: block;
+    margin-bottom: 1mm;
+  }
+  .action-resources ul {
+    margin: 0;
+    padding-left: 5mm;
+    font-size: 9pt;
+  }
+
+  .closing-paragraph {
+    margin-top: 15mm;
+    padding-top: 5mm;
+    border-top: 2px solid #2D1B8E;
+    font-size: 11pt;
+    font-weight: 500;
+  }
+
+  /* APPENDIX PAGE */
+  .behavior-chart {
+    width: 100%;
+    height: auto;
+    margin: 10mm 0;
+  }
+</style>
+</head>
+<body>
+
+  <!-- PAGE 1: COVER -->
+  <div class="cover-page">
+    <div class="cover-header">
+      <div id="logo-placeholder">EquiScore AI</div>
+      <div class="cover-header-right">
+        EquiScore Hackathon<br>
+        {{ date }}
+      </div>
+    </div>
+
+    <div class="cover-center">
+      <h1>GROWTH REPORT</h1>
+      <h2>{{ team_name }}</h2>
+      <div class="track-badge">{{ track_name }}</div>
+      
+      <div class="separator-gradient"></div>
+
+      <div class="score-wrapper">
+        <!-- Replaced with SVG dynamically from Python -->
+        {{ score_svg | safe }}
+        <div class="score-label">{{ overall_score }} / 100</div>
+      </div>
+
+      <div class="muted" style="margin-top: 10mm;">
+        Prepared by EquiScore Auditable AI &mdash; {{ date }}
+      </div>
+    </div>
+
+    <div class="cover-footer">
+      This report is confidential and prepared exclusively for {{ team_name }}.
+    </div>
+  </div>
+
+  <!-- PAGE 2: SUMMARY -->
+  <div class="page-break"></div>
+  <h2>YOUR EVALUATION SUMMARY</h2>
+  
+  <div class="quote-block">
+    {{ track_alignment }}
+  </div>
+
+  <div class="cols-2">
+    <div class="col">
+      <h3 style="color: #00A88A; text-transform: uppercase; font-size: 10pt; letter-spacing: 1px;">What Your Team Did Well</h3>
+      <ul class="list-strengths">
+        {% for strength in strengths %}
+        <li>{{ strength }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="col col-right">
+      <h3 style="color: #C0392B; text-transform: uppercase; font-size: 10pt; letter-spacing: 1px;">Areas For Improvement</h3>
+      <ul class="list-weaknesses">
+        {% for weakness in weaknesses %}
+        <li>{{ weakness }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="audit-note">
+    All scores above are generated by EquiScore AI and grounded in your submitted presentation. The rubric justification on page 3 documents exactly how each score was determined.
+  </div>
+
+  <!-- PAGE 3: RUBRIC -->
+  <div class="page-break"></div>
+  <h2>DETAILED RUBRIC BREAKDOWN</h2>
+  
+  {% for rubric in rubric_scores %}
+  <div class="rubric-row">
+    <div class="rubric-header">
+      <div class="rubric-title">{{ rubric.category }}</div>
+      <div class="rubric-meta">
+        <span class="rubric-weight">Weight: {{ (rubric.weight * 100) | round | int }}%</span>
+        <span class="rubric-score">{{ rubric.raw_score }}/10</span>
+      </div>
+    </div>
+    <div class="bar-bg">
+      <div class="bar-fill" style="width: {{ rubric.raw_score * 10 }}%; background-color: {% if rubric.raw_score >= 8 %}#00A88A{% elif rubric.raw_score >= 5 %}#F39C12{% else %}#C0392B{% endif %};"></div>
+    </div>
+    <div class="rubric-justification">
+      "{{ rubric.one_line_justification }}"
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="overall-justification">
+    <h3 style="margin-top: 0; margin-bottom: 3mm;">OVERALL RUBRIC JUSTIFICATION</h3>
+    {{ rubric_justification }}
+  </div>
+
+  <!-- PAGE 4: ACTION PLAN -->
+  <div class="page-break"></div>
+  <h2>YOUR PERSONALIZED GROWTH PLAN</h2>
+  <div class="action-plan-intro">
+    Based on your lowest-scoring rubric categories, here are concrete steps for your next hackathon:
+  </div>
+
+  {% for item in action_items %}
+  <div class="action-item">
+    <div class="action-title">{{ loop.index }}. {{ item.title }} <span class="category-badge">{{ item.target_category }}</span></div>
+    <div style="margin-top: 2mm; margin-bottom: 2mm;">
+      {{ item.explanation }}
+    </div>
+    <div class="action-resources">
+      <strong>Recommended Resources:</strong>
+      <ul>
+        {% for res in item.resources %}
+        <li>{{ res }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="closing-paragraph">
+    {{ closing_paragraph }}
+  </div>
+
+  <!-- PAGE 5: APPENDIX (Optional) -->
+  {% if behavioral %}
+  <div class="page-break"></div>
+  <h2>PRESENTATION DELIVERY ANALYSIS</h2>
+  
+  <div class="quote-block">
+    {{ behavioral.behavioral_summary }}
+  </div>
+
+  <h3 style="margin-top: 8mm;">Delivery Metrics</h3>
+  <div class="cols-2">
+    <div class="col" style="background-color: #F8F7FF; padding: 5mm; border-radius: 4px;">
+      <h3 style="margin-top:0; color:#2D1B8E;">Confidence Score</h3>
+      <div style="font-size: 24pt; font-weight: bold; color: {% if behavioral.confidence_score >= 80 %}#00A88A{% else %}#F39C12{% endif %};">
+        {{ behavioral.confidence_score }}/100
+      </div>
+    </div>
+    <div class="col col-right" style="padding-left: 5mm;">
+      <h3 style="margin-top:0; color:#2D1B8E;">Pacing Breakdown</h3>
+      <!-- Simple SVG Bar Chart for pacing -->
+      {{ behavioral.pacing_svg | safe }}
+    </div>
+  </div>
+
+  <h3 style="margin-top: 8mm;">Top Behavioral Recommendations</h3>
+  <ul class="list-weaknesses">
+    {% for rec in behavioral.top_behavioral_recommendations %}
+    <li style="margin-bottom: 4mm;">{{ rec }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+</body>
+</html>

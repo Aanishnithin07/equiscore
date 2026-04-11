@@ -1,8 +1,9 @@
-import axios from 'axios';
-import { EvaluationStatusResponse, LeaderboardResponse, TrackEnum } from '../types/evaluation';
+import axios, { InternalAxiosRequestConfig, AxiosError, AxiosResponse } from 'axios';
+import { AuthResponse, EvaluationStatusResponse, LeaderboardResponse, TrackEnum } from '../types/evaluation';
+import { useAuthStore } from '../stores/authStore';
 
 // Fallback UUID v4 generator for request traces
-function generateUUID() {
+function generateUUID(): string {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
         const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
@@ -17,23 +18,85 @@ export const apiClient = axios.create({
   },
 });
 
-// ── Request Interceptor: Inject Trace IDs ────────────────────────────────
-apiClient.interceptors.request.use((config) => {
-  // Add a unique request ID to track end-to-end trace per the backend structlog spec
+// ── Request Interceptor: Inject Trace IDs & Tokens ────────────────────────
+apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (!config.headers['X-Request-ID']) {
     config.headers['X-Request-ID'] = generateUUID();
+  }
+  
+  const token = useAuthStore.getState().accessToken;
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// ── Response Interceptor: Global Error Handling ──────────────────────────
+// ── Response Interceptor: Global Error Handling & Refresh ─────────────────
+let isRefreshing = false;
+let failedQueue: { resolve: (val: string | null) => void; reject: (err: any) => void }[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // In a full app with a toast library, you'd trigger toasts here for 401/500
-    if (error.response?.status === 401) {
-      console.error('Session expired');
-    } else if (error.response?.status >= 500) {
+  (response: AxiosResponse) => response,
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    
+    if (originalRequest && error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/auth/login' && originalRequest.url !== '/auth/refresh') {
+      if (isRefreshing) {
+        return new Promise<string | null>(function(resolve, reject) {
+          failedQueue.push({ resolve, reject });
+        }).then(token => {
+            if (token) {
+                originalRequest.headers.Authorization = 'Bearer ' + token;
+                return apiClient(originalRequest);
+            }
+            return Promise.reject(error);
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = useAuthStore.getState().refreshToken;
+      if (!refreshToken) {
+        useAuthStore.getState().clearAuth();
+        window.location.href = '/login';
+        return Promise.reject(error);
+      }
+
+      try {
+        const { data } = await axios.post<AuthResponse>(
+          `${apiClient.defaults.baseURL}/auth/refresh`,
+          { refresh_token: refreshToken }
+        );
+        useAuthStore.getState().setTokens(data.access_token, data.refresh_token);
+        apiClient.defaults.headers.common.Authorization = `Bearer ${data.access_token}`;
+        processQueue(null, data.access_token);
+        originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
+        return apiClient(originalRequest);
+      } catch (err) {
+        processQueue(err, null);
+        useAuthStore.getState().clearAuth();
+        window.location.href = '/login';
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    if (error.response && error.response.status >= 500) {
       console.error('Server error');
     }
     return Promise.reject(error);
@@ -44,7 +107,6 @@ apiClient.interceptors.response.use(
 export const api = {
   /** Check backend health */
   healthCheck: async (): Promise<{ status: string }> => {
-    // We intentionally hit the root base URL (which removes /api/v1 for health check)
     const url = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace('/api/v1', '') + '/health';
     const { data } = await axios.get(url);
     return data;
@@ -70,19 +132,38 @@ export const api = {
     return data;
   },
 
-  /** Phase 2: Override a score physically (mock endpoint, returns success) */
   submitOverride: async (
     jobId: string,
     score: number,
     notes: string
   ): Promise<{ success: boolean; message: string }> => {
-    // We mock this since the backend route for this specific action wasn't part of Phase 1
-    // Usually this would be: await apiClient.post(`/evaluation/${jobId}/override`, { score, notes });
     console.log(`[Mock Submission] Job: ${jobId}, Score: ${score}, Notes: ${notes}`);
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({ success: true, message: 'Score successfully locked in.' });
-      }, 800); // simulate network delay
-    });
+    return new Promise((resolve) => setTimeout(() => resolve({ success: true, message: 'Score successfully locked in.' }), 800));
   },
+
+  /** Auth Endpoints */
+  login: async (email: string, password: string, hackathon_slug?: string): Promise<AuthResponse> => {
+    const { data } = await apiClient.post<AuthResponse>('/auth/login', { email, password, hackathon_slug });
+    return data;
+  },
+
+  logout: async (): Promise<void> => {
+    await apiClient.post('/auth/logout');
+  },
+
+  register: async (email: string, password: string, fullName: string): Promise<AuthResponse> => {
+    const { data } = await apiClient.post<AuthResponse>('/auth/register', { email, password, full_name: fullName });
+    return data;
+  },
+
+  /** Invites */
+  getInvitePreview: async (token: string): Promise<{hackathon_name: string; role: string; team_name: string | null}> => {
+    const { data } = await apiClient.get(`/invites/${token}/preview`);
+    return data;
+  },
+
+  redeemInvite: async (token: string, teamName?: string): Promise<{message: string; hackathon_id: string; role: string}> => {
+    const { data } = await apiClient.post('/invites/redeem', { token, team_name: teamName });
+    return data;
+  }
 };

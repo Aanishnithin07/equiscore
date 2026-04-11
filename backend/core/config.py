@@ -68,6 +68,29 @@ class Settings(BaseSettings):
         description="Maximum number of retries for failed Celery tasks",
     )
 
+    # ── Security & Authentication ─────────────────────────────────────────
+    SECRET_KEY: SecretStr = Field(
+        ...,
+        min_length=32,
+        description="Secret key for JWT generation",
+    )
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(
+        default=30,
+        description="JWT access token expiry in minutes",
+    )
+    REFRESH_TOKEN_EXPIRE_DAYS: int = Field(
+        default=7,
+        description="JWT refresh token expiry in days",
+    )
+    ALGORITHM: str = Field(
+        default="HS256",
+        description="JWT signing algorithm",
+    )
+    BCRYPT_ROUNDS: int = Field(
+        default=12,
+        description="Bcrypt hashing rounds",
+    )
+
     # ── Logging ───────────────────────────────────────────────────────────
     LOG_LEVEL: str = Field(
         default="INFO",

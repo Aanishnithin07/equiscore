@@ -20,6 +20,9 @@ import structlog
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from api.v1.routes.auth import limiter
 
 from api.v1 import v1_router
 from core.config import settings
@@ -212,3 +215,6 @@ def create_app() -> FastAPI:
 # ── Application Instance ─────────────────────────────────────────────────
 # Used by uvicorn: `uvicorn main:app --reload`
 app = create_app()
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)

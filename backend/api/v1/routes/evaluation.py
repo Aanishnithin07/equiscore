@@ -23,6 +23,8 @@ import structlog
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from core.permissions import require_role, get_current_hackathon_id
+from models.user import User
 
 from core.dependencies import get_db
 from models.evaluation import (
@@ -88,6 +90,8 @@ async def submit_evaluation(
         description="Pitch deck file (.pdf or .pptx, max 50MB)",
     ),
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(require_role("organizer", "team_member")),
+    hackathon_id: uuid.UUID = Depends(get_current_hackathon_id),
 ) -> EvaluationSubmissionResponse:
     """
     Submit a pitch deck for asynchronous AI evaluation.
@@ -149,7 +153,7 @@ async def submit_evaluation(
     # ── Step 4: Upsert Team record ────────────────────────────────────
     # Use the ORM TrackType enum for the database model
     db_track = TrackType(track.value)
-    team = await _upsert_team(db, team_name, db_track)
+    team = await _upsert_team(db, team_name, db_track, hackathon_id)
 
     # ── Step 5: Create Evaluation record ──────────────────────────────
     job_id = uuid.uuid4()
@@ -204,6 +208,8 @@ async def submit_evaluation(
 async def get_evaluation_status(
     job_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(require_role("organizer", "judge", "team_member")),
+    hackathon_id: uuid.UUID = Depends(get_current_hackathon_id),
 ) -> EvaluationStatusResponse:
     """
     Get the current status and results of an evaluation.
@@ -221,7 +227,9 @@ async def get_evaluation_status(
     # ── Query evaluation with team relationship ───────────────────────
     result = await db.execute(
         select(Evaluation)
+        .join(Team, Evaluation.team_id == Team.id)
         .where(Evaluation.job_id == job_id)
+        .where(Team.hackathon_id == hackathon_id)
     )
     evaluation = result.scalar_one_or_none()
 
@@ -315,6 +323,7 @@ async def _upsert_team(
     db: AsyncSession,
     team_name: str,
     track: TrackType,
+    hackathon_id: uuid.UUID,
 ) -> Team:
     """
     Create a new team or return the existing one (upsert by name).
@@ -334,7 +343,9 @@ async def _upsert_team(
     normalized_name = " ".join(team_name.split())
 
     result = await db.execute(
-        select(Team).where(Team.name == normalized_name)
+        select(Team)
+        .where(Team.name == normalized_name)
+        .where(Team.hackathon_id == hackathon_id)
     )
     team = result.scalar_one_or_none()
 
@@ -344,7 +355,7 @@ async def _upsert_team(
         await db.commit()
         await db.refresh(team)
     else:
-        team = Team(name=normalized_name, track=track)
+        team = Team(name=normalized_name, track=track, hackathon_id=hackathon_id)
         db.add(team)
         await db.commit()
         await db.refresh(team)

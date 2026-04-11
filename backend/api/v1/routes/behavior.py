@@ -3,10 +3,13 @@ from fastapi import APIRouter, File, UploadFile, Form, Depends, HTTPException, s
 import uuid
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from models.evaluation import BehaviorJob
+from sqlalchemy import select
+from models.evaluation import BehaviorJob, Evaluation, Team
 from core.dependencies import get_db
 from schemas.common import JobStatusResponse
 from tasks.behavior_tasks import evaluate_behavior_task
+from core.permissions import require_role, get_current_hackathon_id
+from models.user import User
 
 router = APIRouter(prefix="/behavior", tags=["Behavioral Analysis"])
 
@@ -21,7 +24,9 @@ MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
 async def analyze_behavior(
     file: UploadFile = File(...),
     evaluation_id: Optional[uuid.UUID] = Form(None),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(require_role("organizer", "team_member")),
+    hackathon_id: uuid.UUID = Depends(get_current_hackathon_id),
 ):
     """
     Upload a pitch audio or video recording for behavioral transcription and psychological analysis.
@@ -38,6 +43,16 @@ async def analyze_behavior(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail="File size exceeds the 25MB limit."
         )
+
+    if evaluation_id:
+        eval_check = await db.execute(
+            select(Evaluation)
+            .join(Team, Evaluation.team_id == Team.id)
+            .where(Evaluation.id == evaluation_id)
+            .where(Team.hackathon_id == hackathon_id)
+        )
+        if not eval_check.scalar_one_or_none():
+            raise HTTPException(status_code=403, detail="Invalid evaluation ID or missing permissions for this hackathon.")
 
     # Convert to base64 immediately for celery serialization safety
     file_b64 = base64.b64encode(file_bytes).decode('utf-8')
@@ -62,7 +77,12 @@ async def analyze_behavior(
     )
 
 @router.get("/{job_id}")
-async def get_behavior_result(job_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+async def get_behavior_result(
+    job_id: uuid.UUID, 
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(require_role("organizer", "team_member", "judge")),
+    hackathon_id: uuid.UUID = Depends(get_current_hackathon_id),
+):
     """
     Polls the exact status or returns the behavioral analysis result when complete.
     """

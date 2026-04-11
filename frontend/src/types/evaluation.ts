@@ -4,6 +4,36 @@
  */
 
 export type TrackEnum = 'healthcare' | 'ai_ml' | 'open_innovation';
+export type HackathonRole = 'organizer' | 'judge' | 'team_member';
+
+export interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  global_role: string;
+  memberships: {
+    hackathon_id: string;
+    role: HackathonRole;
+  }[];
+}
+
+export interface AuthResponse {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+}
+
+export interface HackathonResponse {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  owner_id: string;
+  status: string;
+  submission_deadline: string;
+  max_team_size: number;
+  tracks_enabled: string[];
+}
 
 export type EvaluationStatusEnum = 'pending' | 'processing' | 'completed' | 'failed';
 
