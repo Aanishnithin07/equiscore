@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 
-const MOCK_CARDS = [
+const FEATURES = [
   { title: "Behavioral Analytics", desc: "Identify pacing and confidence in real time." },
   { title: "Bias Auditing", desc: "Mathematical Pearson proof of fair AI decisions." },
   { title: "Vercel & Apple Scale", desc: "Designed natively bypassing sluggish frameworks." }
@@ -93,7 +93,7 @@ export const EmptyState: React.FC = () => {
       </motion.div>
 
       <div className="flex gap-4 mt-16 z-10">
-        {MOCK_CARDS.map((card, i) => (
+        {FEATURES.map((card, i) => (
           <motion.div 
             key={i}
             initial={{ y: 20, opacity: 0 }}

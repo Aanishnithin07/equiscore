@@ -7,36 +7,33 @@ import { StrengthsWeaknesses } from '../StrengthsWeaknesses/StrengthsWeaknesses'
 import { JustificationCard } from '../JustificationCard/JustificationCard';
 import { SuggestedQnA } from '../SuggestedQnA/SuggestedQnA';
 import { BehavioralSection } from '../BehavioralSection/BehavioralSection';
+import { useEvaluation } from '../../../hooks/useEvaluation';
 
-// MOCK DATA GENERATOR FOR DEMO PURPOSES
+// Fallback skeleton structure purely for structural mapping if DB is empty
 const MOCK_DATA = {
   rubric: [
-    { id: '1', category: 'Technical Complexity', score: 9.5, maxScore: 10, weightLabel: '30%', justification: 'Implemented a novel distributed consensus algorithm bypassing standard Raft overheads.' },
-    { id: '2', category: 'Market Potential', score: 7.0, maxScore: 10, weightLabel: '25%', justification: 'Addressable market is substantial, but go-to-market strategy lacks differentiation.' },
-    { id: '3', category: 'UI / UX Polish', score: 8.5, maxScore: 10, weightLabel: '20%', justification: 'Spatial UI components execute flawlessly natively. Exceptionally premium.' },
+    { id: '1', category: 'Technical Complexity', score: 0, maxScore: 10, weightLabel: '30%', justification: 'Pending Evaluation' },
   ],
-  strengths: [
-    { id: '1', text: 'Exceptionally deep technical stack avoiding boilerplate.' },
-    { id: '2', text: 'Architectural blueprints validate 100k TPS loads natively.' },
-    { id: '3', text: 'Stunning visual execution.' }
-  ],
-  weaknesses: [
-    { id: '1', text: 'Pricing model assumes infinite runway.' },
-    { id: '2', text: 'Pitch delivery rushed over core value proposition.' }
-  ],
-  qna: [
-    { id: '1', question: 'How do you plan to acquire your first 1,000 paid MAUs without VC subsidies?', explanation: 'The team failed to explain customer acquisition costs organically during the main deck presentation.', targetWeakness: 'Pricing Model' },
-    { id: '2', question: 'What happens when your primary LLM endpoint degrades globally?', explanation: 'Given their heavy reliance on deep inferencing, failover state handling must be verified manually.', targetWeakness: 'Technical Risk' }
-  ],
+  strengths: [{ id: '1', text: 'Pending analysis phase...' }],
+  weaknesses: [{ id: '1', text: 'Waiting for model readout...' }],
+  qna: [{ id: '1', question: 'Analysis pending...', explanation: '', targetWeakness: '' }],
   behavior: {
-    score: 87,
-    confidence: 94,
-    pacing: { problem: 0.15, solution: 0.45, demo: 0.25, team: 0.05, ask: 0.10 },
-    fillerWords: [{ word: 'um', count: 18 }, { word: 'basically', count: 12 }, { word: 'like', count: 8 }, { word: 'literally', count: 4 }]
+    score: 0,
+    confidence: 0,
+    pacing: { problem: 0.2, solution: 0.2, demo: 0.2, team: 0.2, ask: 0.2 },
+    fillerWords: []
   }
 };
 
 export const TeamDetailPanel: React.FC<{ teamId: string }> = ({ teamId }) => {
+  const { data: evaluation } = useEvaluation(teamId);
+  const eva = evaluation as any;
+  const result = eva?.result;
+
+  const rubric = result?.metrics ? Object.entries(result.metrics).map(([k, v], i) => ({ id: String(i), category: k, score: (v as any).score || 0, maxScore: 10, weightLabel: 'Auto', justification: (v as any).justification || '' })) : MOCK_DATA.rubric;
+  const strengths = result?.strengths?.map((s: string, i: number) => ({ id: String(i), text: s })) || MOCK_DATA.strengths;
+  const weaknesses = result?.weaknesses?.map((s: string, i: number) => ({ id: String(i), text: s })) || MOCK_DATA.weaknesses;
+
   return (
     <motion.div 
       key={teamId} // This triggers crossfade in AnimatePresence implicitly
@@ -54,8 +51,8 @@ export const TeamDetailPanel: React.FC<{ teamId: string }> = ({ teamId }) => {
           
           {/* Left Column (60%) */}
           <div className="flex flex-col w-[60%] shrink-0 pr-8">
-            <h1 className="display-2 text-white mb-2 truncate">Global Ledger AI</h1>
-            <span className="microlabel text-[var(--text-tertiary)] mb-6">SUBMITTED 14:32 · 12 SLIDES</span>
+            <h1 className="display-2 text-white mb-2 truncate">{eva?.metadata?.teamInfo || 'Team Analysis'}</h1>
+            <span className="microlabel text-[var(--text-tertiary)] mb-6">SUBMITTED RECENTLY · ALGORITHM LIVE</span>
             
             {/* Status Row */}
             <div className="flex items-center gap-3 mb-6">
@@ -69,10 +66,9 @@ export const TeamDetailPanel: React.FC<{ teamId: string }> = ({ teamId }) => {
               </div>
             </div>
 
-            {/* Track alignment quote */}
             <div className="border-l-2 border-l-[var(--accent-400)] pl-4">
               <p className="font-sans text-[14px] italic text-[var(--text-secondary)] leading-relaxed max-w-[90%]">
-                "We fundamentally believe existing consensus engines are broken. We rebuilt everything implicitly leveraging spatial inference structures."
+                "{eva?.metadata?.deckUrl || 'Deep mathematical abstractions evaluating real-time spatial arrays optimally.'}"
               </p>
             </div>
           </div>
@@ -80,18 +76,18 @@ export const TeamDetailPanel: React.FC<{ teamId: string }> = ({ teamId }) => {
           {/* Right Column (40%) */}
           <div className="flex-1 flex flex-col items-center justify-center shrink-0 border-l border-[var(--border-ghost)] pl-8">
             <div className="relative isolate flex flex-col items-center">
-              <ScoreRing score={85} size="xl" />
+              <ScoreRing score={result?.overall_score || 0} size="xl" />
               <div className="mt-4">
-                <span className="microlabel text-teal-400/80 tracking-widest text-[10px]">STRONG POTENTIAL</span>
+                <span className="microlabel text-teal-400/80 tracking-widest text-[10px]">{(result?.overall_score || 0) > 80 ? 'STRONG POTENTIAL' : 'REVIEW NEEDED'}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <RubricBreakdown items={MOCK_DATA.rubric} />
-      <StrengthsWeaknesses strengths={MOCK_DATA.strengths} weaknesses={MOCK_DATA.weaknesses} />
-      <JustificationCard text="Based on the comprehensive tensor heuristics and behavioral telemetry mapping standard deviations across prior winners objectively, this applicant exhibits profound alignment with the Open AI vertical uniquely. While pricing assumptions bear unmitigated friction inherently, technical architectures scale globally safely. A lock-in score of 85 maps statistical baselines accordingly." />
+      <RubricBreakdown items={rubric} />
+      <StrengthsWeaknesses strengths={strengths} weaknesses={weaknesses} />
+      <JustificationCard text={result?.feedback || "Evaluation parameters parsing through heuristic endpoints natively. Validating structures intrinsically."} />
       <SuggestedQnA questions={MOCK_DATA.qna} />
       <BehavioralSection data={MOCK_DATA.behavior} />
 

@@ -4,18 +4,40 @@ import { TrackViolinChart } from '../../components/organizer/TrackViolinChart/Tr
 import { RubricHeatmap } from '../../components/organizer/RubricHeatmap/RubricHeatmap';
 import { PlagiarismScatterPlot } from '../../components/organizer/PlagiarismScatterPlot/PlagiarismScatterPlot';
 import { motion } from 'framer-motion';
-
-// Pull the mocks directly to satisfy the page composition for now natively
-const heatmapCategories = ['Innovation', 'Technical Complexity', 'Business Viability', 'Design & UX', 'Feasibility'];
-const heatmapData = heatmapCategories.flatMap(c => ['health', 'ai', 'open'].map(t => ({ trackId: t as any, category: c, avgScore: Math.random() * 40 + 40, teamCount: 15 })));
-const distData = Array.from({ length: 21 }).map((_, i) => ({ score: i * 5, count: Math.round(Math.exp(-Math.pow(i * 5 - 75, 2) / 450) * 100), percentile: i * 5 }));
-const nodes = Array.from({ length: 40 }).map((_, i) => ({ id: `n${i}`, name: `Team ${i}`, x: Math.random(), y: Math.random(), trackId: 'ai' as any }));
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '../../api/client';
+import { Loader2 } from 'lucide-react';
 
 /**
  * @page AnalyticsPage
  * @description Master data-art composing grid framing 4 extreme visualization matrices symmetrically.
  */
 export const AnalyticsPage: React.FC = () => {
+    const { data: analytics, isLoading } = useQuery({
+       queryKey: ['global-analytics'],
+       queryFn: async () => {
+           const res = await apiClient.get('/analytics/overview');
+           return res.data;
+       }
+    });
+
+    if (isLoading) {
+        return (
+            <div className="w-full min-h-[100dvh] flex items-center justify-center">
+                <Loader2 className="animate-spin text-[var(--accent-400)]" size={48} />
+            </div>
+        );
+    }
+
+    const { 
+        distData = [], 
+        heatmapData = [], 
+        heatmapCategories = [], 
+        nodes = [],
+        mean = 0,
+        median = 0 
+    } = analytics || {};
+
     return (
         <div className="w-full min-h-[100dvh] flex flex-col p-8 gap-8 overflow-y-auto custom-scrollbar">
             
@@ -26,11 +48,11 @@ export const AnalyticsPage: React.FC = () => {
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 w-full">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                    <ScoreDistributionChart data={distData} mean={73} median={76} />
+                    <ScoreDistributionChart data={distData} mean={mean} median={median} />
                 </motion.div>
                 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                    <TrackViolinChart tracks={[{ id: 'h', name: 'Health', type: 'health', metrics: {min: 0, max: 100, median: 80}, distribution: distData.map(d => ({ score: d.score, value: d.count })) }]} />
+                    <TrackViolinChart tracks={[{ id: 'h', name: 'Health', type: 'health', metrics: {min: 0, max: 100, median: 80}, distribution: distData.map((d: any) => ({ score: d.score, value: d.count })) }]} />
                 </motion.div>
             </div>
 

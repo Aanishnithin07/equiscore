@@ -137,8 +137,13 @@ export const api = {
     score: number,
     notes: string
   ): Promise<{ success: boolean; message: string }> => {
-    console.log(`[Mock Submission] Job: ${jobId}, Score: ${score}, Notes: ${notes}`);
-    return new Promise((resolve) => setTimeout(() => resolve({ success: true, message: 'Score successfully locked in.' }), 800));
+    const { data } = await apiClient.post(`/evaluate-pitch`, { 
+        job_id: jobId, 
+        evaluator_id: "judge", 
+        human_score: score, 
+        human_notes: notes 
+    });
+    return data;
   },
 
   /** Auth Endpoints */

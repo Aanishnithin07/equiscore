@@ -75,7 +75,7 @@ function AppContent() {
                         <RoleGuard allowedRoles={['team_member', 'organizer']}>
                             <Routes>
                                 <Route path="submit" element={<SubmissionPage />} />
-                                <Route path="reveal" element={<ScoreRevealPage score={98.5} rank={12} totalTeams={420} advanced={true} onContinue={() => {}} />} />
+                                <Route path="reveal" element={<ScoreRevealPage score={98.5} rank={12} totalTeams={420} advanced={true} onDownloadReport={() => {}} onViewDetailedResults={() => {}} />} />
                                 <Route path="results" element={<TeamResultsPage />} />
                                 <Route path="*" element={<Navigate to="submit" replace />} />
                             </Routes>

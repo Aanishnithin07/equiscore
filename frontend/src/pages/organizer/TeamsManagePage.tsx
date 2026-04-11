@@ -1,27 +1,16 @@
 import React, { useState } from 'react';
-import { Filter, Download, X, Search } from 'lucide-react';
+import { Filter, Download, X, Search, Loader2 } from 'lucide-react';
 import { VirtualTeamTable, TableTeamData } from '../../components/organizer/VirtualTeamTable/VirtualTeamTable';
 import { FloatingBulkActionBar } from '../../components/organizer/FloatingBulkActionBar/FloatingBulkActionBar';
 import { Button } from '../../components/ds/Button/Button';
-
-// Stub mockdata
-const MOCK_TEAMS: TableTeamData[] = Array.from({ length: 50 }).map((_, i) => ({
-    id: `team-${i}`,
-    rank: i < 30 ? i + 1 : null,
-    name: `Neural Navigators ${i}`,
-    track: { id: 'ai', name: 'AI/ML', color: 'var(--accent-400)' },
-    score: i < 30 ? 98.4 - (i * 0.5) : null,
-    behavioral: i < 30 ? 82.1 : null,
-    status: i < 5 ? 'advanced' : i < 30 ? 'evaluated' : 'unscored',
-    topStrengths: ['Exceptional model depth', 'Clear deployment strats'],
-    topWeakness: 'Token costs explicitly ignored',
-}));
+import { useOrganizerData } from '../../hooks/useOrganizerData';
 
 /**
  * @page TeamsManagePage
  * @description Composes Table + Filters mapping 500+ records organically parsing bulk overlays.
  */
 export const TeamsManagePage: React.FC = () => {
+  const { teams, isLoading } = useOrganizerData();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [expanded, setExpanded] = useState<string | null>(null);
   
@@ -48,8 +37,16 @@ export const TeamsManagePage: React.FC = () => {
 
   const handleToggleAll = (all: boolean) => {
       if (!all) setSelected(new Set());
-      else setSelected(new Set(MOCK_TEAMS.map(t => t.id)));
+      else setSelected(new Set(teams.map((t: any) => t.id)));
   };
+
+  if (isLoading) {
+      return (
+          <div className="w-full h-full flex items-center justify-center bg-[var(--bg-void)]">
+              <Loader2 className="animate-spin text-[var(--accent-400)]" size={48} />
+          </div>
+      );
+  }
 
   return (
     <div className="w-full h-full flex flex-col p-8 pb-0">
@@ -102,7 +99,7 @@ export const TeamsManagePage: React.FC = () => {
                 <input 
                     type="checkbox" 
                     onChange={e => handleToggleAll(e.target.checked)}
-                    checked={selected.size === MOCK_TEAMS.length && MOCK_TEAMS.length > 0}
+                    checked={selected.size === (teams?.length || 0) && (teams?.length || 0) > 0}
                     className="w-4 h-4 rounded-[4px] bg-[var(--bg-void)] border border-[var(--border-strong)] checked:bg-[var(--accent-400)] checked:border-[var(--accent-400)] appearance-none cursor-pointer relative before:content-[''] checked:before:block before:hidden before:w-[4px] before:h-[8px] before:border-r-2 before:border-b-2 before:border-white before:absolute before:left-1.5 before:top-[1px] before:rotate-45" 
                 />
             </div>
@@ -116,7 +113,7 @@ export const TeamsManagePage: React.FC = () => {
         </div>
 
         <VirtualTeamTable
-            data={MOCK_TEAMS}
+            data={teams as any}
             selectedIds={selected}
             onToggleSelect={toggleSelect}
             onToggleAll={handleToggleAll}
