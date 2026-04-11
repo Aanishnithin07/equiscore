@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useOrganizerData } from '../../hooks/useOrganizerData';
 import { StatCard } from '../../components/organizer/StatCard';
 import { PublishResultsModal } from '../../components/organizer/PublishResultsModal';
+import { PlagiarismAlertBanner } from '../../components/organizer/PlagiarismAlertBanner';
 import { 
     Users, Activity, TrendingUp, AlertTriangle, 
     Settings, PlayCircle, BarChart2, Link as LinkIcon 
@@ -51,6 +52,8 @@ export const OrganizerDashboard: React.FC = () => {
                         Advance Stage
                     </button>
                 </header>
+
+                <PlagiarismAlertBanner />
 
                 {/* Top Level Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">

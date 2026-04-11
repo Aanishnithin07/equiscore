@@ -39,6 +39,14 @@ class Settings(BaseSettings):
         description="Redis URL for Celery broker and result backend",
     )
 
+    # ── Email Engine ──────────────────────────────────────────────────────
+    from typing import Optional
+    SENDGRID_API_KEY: Optional[str] = Field(default=None)
+    EMAIL_FROM: str = Field(default="noreply@equiscore.app")
+    EMAIL_FROM_NAME: str = Field(default="EquiScore")
+    SMTP_HOST: Optional[str] = Field(default=None)
+    SMTP_PORT: int = Field(default=587)
+
     # ── OpenAI ────────────────────────────────────────────────────────────
     # SecretStr prevents the key from appearing in logs or repr()
     from pydantic import SecretStr

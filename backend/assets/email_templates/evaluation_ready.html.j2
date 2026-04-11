@@ -1,0 +1,19 @@
+{% extends "base.html.j2" %}
+{% block content %}
+<h2>Your AI Evaluation Is Ready</h2>
+<p>Hello <strong>{{ team_name }}</strong>,</p>
+<p>EquiScore has successfully scored and analyzed your submission for {{ hackathon_name }}.</p>
+
+<div style="background-color: #1e293b; padding: 20px; border-radius: 8px; color: white; text-align: center; margin: 20px 0;">
+    <p style="margin: 0; color: #94a3b8; font-size: 14px; text-transform: uppercase;">Overall Engine Score</p>
+    <h1 style="color: #00d4aa; font-size: 48px; margin: 10px 0;">{{ overall_score }}/100</h1>
+</div>
+
+<p><strong>Top Highlighted Strength:</strong> {{ top_strength }}</p>
+
+{% if results_locked %}
+    <p><em>The full weakness breakdown and rubric distribution will be strictly hidden until the organizers finalize all leaderboards.</em></p>
+{% else %}
+    <p>You can view your full results live in the dashboard now.</p>
+{% endif %}
+{% endblock %}

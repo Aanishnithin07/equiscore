@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { TrackEnum } from '../types/evaluation';
 import { api } from '../api/client';
+import { useQueryClient } from '@tanstack/react-query';
+
+let wsInstance: WebSocket | null = null;
+let pingInterval: ReturnType<typeof setInterval> | null = null;
 
 interface JudgeState {
   // State
@@ -10,6 +14,7 @@ interface JudgeState {
   judgeNotes: string;
   isSubmitting: boolean;
   submittedJobIds: Set<string>;
+  plagiarismAlerts: any[];
 
   // Actions
   setSelectedJob: (jobId: string | null, aiScore?: number) => void;
@@ -17,6 +22,10 @@ interface JudgeState {
   setHumanScore: (score: number) => void;
   setNotes: (notes: string) => void;
   submitOverride: () => Promise<void>;
+  
+  // WS
+  connectWebSocket: (hackathonId: string, token: string, queryClient: any) => void;
+  disconnectWebSocket: () => void;
 }
 
 export const useJudgeStore = create<JudgeState>()((set, get) => ({
@@ -26,6 +35,7 @@ export const useJudgeStore = create<JudgeState>()((set, get) => ({
   judgeNotes: '',
   isSubmitting: false,
   submittedJobIds: new Set<string>(),
+  plagiarismAlerts: [],
 
   setSelectedJob: (jobId, aiScore = 50) => 
     set((state) => {
@@ -66,4 +76,54 @@ export const useJudgeStore = create<JudgeState>()((set, get) => ({
       set({ isSubmitting: false });
     }
   },
+
+  connectWebSocket: (hackathonId, token, queryClient) => {
+    if (wsInstance) return;
+
+    const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
+    const ws = new WebSocket(`${WS_URL}/api/v1/ws/hackathon/${hackathonId}?token=${token}`);
+
+    ws.onopen = () => {
+      console.log('WS Connected for hackathon:', hackathonId);
+      pingInterval = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send('ping');
+        }
+      }, 25000);
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'evaluation_complete') {
+          // Invalidate leaderboard to trigger a refetch since a new score came in automatically natively
+          queryClient.invalidateQueries({ queryKey: ['leaderboard', 'all'] });
+        } else if (data.type === 'plagiarism_alert') {
+          set((state) => ({ plagiarismAlerts: [data.payload, ...state.plagiarismAlerts] }));
+        }
+      } catch (e) {
+        console.error('Failed to parse WS message', e);
+      }
+    };
+
+    ws.onclose = () => {
+      console.log('WS Disconnected');
+      if (pingInterval) clearInterval(pingInterval);
+      wsInstance = null;
+      // Auto-reconnect could go here
+    };
+
+    wsInstance = ws;
+  },
+
+  disconnectWebSocket: () => {
+    if (wsInstance) {
+      wsInstance.close();
+      wsInstance = null;
+    }
+    if (pingInterval) {
+      clearInterval(pingInterval);
+      pingInterval = null;
+    }
+  }
 }));

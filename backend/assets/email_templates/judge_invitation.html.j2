@@ -1,0 +1,12 @@
+{% extends "base.html.j2" %}
+{% block content %}
+<h2>You've been invited to judge {{ hackathon_name }}! ⚖️</h2>
+<p>Hello {{ judge_name }},</p>
+<p><strong>{{ organizer_name }}</strong> has securely provisioned you a Judging token on the EquiScore platform allowing you to oversee AI evaluations, override arbitrary rubric assignments, and assist in accelerating leaderboard deployments.</p>
+
+<div style="text-align: center; margin-top: 30px;">
+    <a href="{{ invite_url }}" class="btn btn-organizer">Accept Invitation Token</a>
+</div>
+
+<p style="font-size: 12px; color: #64748b; margin-top: 20px;">This token automatically expires at {{ expires_at }}</p>
+{% endblock %}

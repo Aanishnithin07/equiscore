@@ -1,0 +1,10 @@
+{% extends "base.html.j2" %}
+{% block content %}
+<h2>Submission Received, {{ team_name }}! 👋</h2>
+<p>Your EquiScore AI evaluation sequence has officially begun for the <strong>{{ track_name }}</strong> track in {{ hackathon_name }}.</p>
+<p>Our extraction engine successfully verified the ingestion size of your files upon entry at {{ submission_time }}.</p>
+<div style="background-color: #f8fafc; padding: 15px; border-left: 4px solid #00d4aa; margin: 20px 0;">
+    <strong>What's Next?</strong><br>
+    The AI judge is evaluating your work. Expected completion: ~{{ expected_wait_minutes }} minutes. We will automatically notify you when it completes.
+</div>
+{% endblock %}

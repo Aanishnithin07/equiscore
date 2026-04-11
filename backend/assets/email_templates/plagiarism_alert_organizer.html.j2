@@ -1,0 +1,18 @@
+{% extends "base.html.j2" %}
+{% block content %}
+<h2 style="color: #ef4444;">⚠ Plagiarism Alert Triggered</h2>
+<p>Hello {{ organizer_name }},</p>
+<p>EquiScore's semantic analysis engine flagged an extremely high correlation between two independent submissions natively within <strong>{{ hackathon_name }}</strong>.</p>
+
+<div style="background-color: #fef2f2; border: 1px solid #fca5a5; padding: 15px; border-radius: 8px; margin: 20px 0;">
+    <p style="margin: 0 0 10px 0;"><strong>Team A:</strong> {{ team_a }}</p>
+    <p style="margin: 0 0 10px 0;"><strong>Team B:</strong> {{ team_b }}</p>
+    <p style="margin: 0; color: #ef4444; font-weight: bold;">Similarity Score: {{ "%.1f"|format(similarity_score * 100) }}%</p>
+</div>
+
+<p>Please review these pairs manually inside the organizer dashboard to determine whether identical baseline templates were utilized transparently or malicious aggregation occurred.</p>
+
+<div style="text-align: center; margin-top: 30px;">
+    <a href="{{ review_url }}" class="btn btn-organizer">Review In Dashboard</a>
+</div>
+{% endblock %}

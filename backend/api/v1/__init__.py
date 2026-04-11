@@ -4,7 +4,7 @@ from fastapi import APIRouter
 
 from api.v1.routes import (
     evaluation, leaderboard, behavior, reports, 
-    auth, hackathons, invites
+    auth, hackathons, invites, websocket, plagiarism
 )
 
 # ── V1 Router ─────────────────────────────────────────────────────────────
@@ -39,4 +39,12 @@ v1_router.include_router(
 v1_router.include_router(
     invites.router,
     tags=["Invites"],
+)
+v1_router.include_router(
+    websocket.router,
+    tags=["WebSockets"],
+)
+v1_router.include_router(
+    plagiarism.router,
+    tags=["Plagiarism"],
 )

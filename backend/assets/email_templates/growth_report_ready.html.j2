@@ -1,0 +1,10 @@
+{% extends "base.html.j2" %}
+{% block content %}
+<h2>Your Empathic Growth Report Is Ready 📘</h2>
+<p>Hello <strong>{{ team_name }}</strong>,</p>
+<p>Working on hackathon projects is incredibly difficult. We know you poured your heart into your submission for {{ hackathon_name }}. To ensure your effort translates strictly into future success, EquiScore has uniquely compiled a personalized, mentor-styled PDF detailing exactly what went well and actionable blueprints to optimize your solution layer next time.</p>
+
+<div style="text-align: center; margin-top: 30px;">
+    <a href="{{ report_download_url }}" class="btn">Download Growth Report PDF</a>
+</div>
+{% endblock %}

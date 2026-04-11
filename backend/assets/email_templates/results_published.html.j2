@@ -1,0 +1,18 @@
+{% extends "base.html.j2" %}
+{% block content %}
+<h2>Results Published: {{ hackathon_name }} 🏆</h2>
+<p>The organizers have officially finalized the leaderboard. Out of <strong>{{ total_teams }}</strong> teams, your team ({{ team_name }}) finished at:</p>
+
+<div style="background-color: #fffbeb; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; border: 1px solid #fcd34d;">
+    <h2 style="color: #b45309; margin: 0; font-size: 32px;">Rank #{{ final_rank }}</h2>
+    <p style="color: #92400e; margin: 5px 0 0 0;">Overall Score: {{ overall_score }}</p>
+</div>
+
+{% if advanced %}
+    <p><strong>✨ Congratulations!</strong> Your team has been selected by the organizers to advance. Prepare your presentation!</p>
+{% else %}
+    <p>While you were not explicitly selected to advance, we generated a comprehensive Growth Action Plan PDF uniquely designed for your solution architecture.</p>
+{% endif %}
+
+<a href="{{ FRONTEND_URL }}/team/results" class="btn">View Complete Results Dashboard</a>
+{% endblock %}

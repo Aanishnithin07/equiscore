@@ -15,7 +15,7 @@
 services:
   # ── PostgreSQL 16 ───────────────────────────────────────────────────
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: equiscore-postgres
     restart: unless-stopped
     environment:

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f4f5; margin: 0; padding: 20px; color: #18181b; }
+        .container { background-color: #ffffff; max-width: 600px; margin: 0 auto; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .header { background-color: #1e293b; padding: 20px; text-align: center; }
+        .header h1 { color: #00d4aa; margin: 0; font-size: 24px; font-weight: 900; letter-spacing: -0.5px; }
+        .content { padding: 32px; font-size: 16px; line-height: 1.6; }
+        .footer { background-color: #1e293b; color: #94a3b8; padding: 20px; text-align: center; font-size: 12px; }
+        .btn { display: inline-block; background-color: #00d4aa; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; margin-top: 16px; }
+        .btn-organizer { background-color: #ffb347; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>EquiScore™</h1>
+        </div>
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+        <div class="footer">
+            <p>Sent via EquiScore Automated Pipeline for {{ hackathon_name }}</p>
+            <p>Don't want these updates? <a href="#" style="color:#00d4aa">Unsubscribe</a></p>
+        </div>
+    </div>
+</body>
+</html>

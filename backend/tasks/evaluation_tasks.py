@@ -32,6 +32,9 @@ from schemas.evaluation import TrackEnum
 from services.file_extractor import ExtractionError, PitchDeckExtractor
 from services.llm_evaluator import LLMEvaluator, LLMOutputValidationError
 from tasks.celery_app import celery_app
+from core.websocket_manager import manager
+from tasks.plagiarism_tasks import run_plagiarism_check_task
+from tasks.email_tasks import send_evaluation_ready_task
 
 logger = structlog.get_logger(__name__)
 
@@ -238,6 +241,33 @@ def evaluate_pitch_task(
             session.add(rubric_score)
 
         session.commit()
+
+        # Step +1 WS Broadcast (Realtime Score Push)
+        hackathon_id = str(evaluation.team.hackathon_id)
+        team_name = evaluation.team.name
+        
+        # Calculate rank pseudo representation (could be more intensive leaderboard calculation)
+        asyncio.run(manager.broadcast_to_hackathon(hackathon_id, {
+            "type": "evaluation_complete",
+            "payload": {
+                "job_id": evaluation_id,
+                "team_name": team_name,
+                "overall_score": llm_result.overall_score,
+                "rank": "TBD" # Will be hydrated functionally by frontend
+            }
+        }))
+
+    # Chain the plagiarism detection vector extraction async task automatically
+    run_plagiarism_check_task.delay(evaluation_id, hackathon_id)
+    
+    # Notify team their AI response is ready
+    send_evaluation_ready_task.delay(
+        team_email="team@example.com", # Target resolving 
+        team_name=team_name, 
+        overall_score=llm_result.overall_score, 
+        top_strength="Excellent value proposition alignment", 
+        hackathon_name="EquiScore Hackathon"
+    )
 
     elapsed = time.monotonic() - start_time
     logger.info(
