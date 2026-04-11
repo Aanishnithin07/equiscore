@@ -13,5 +13,8 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true, // Allow external connections if needed during testing
+  },
+  optimizeDeps: {
+    include: ['react-window']
   }
 })

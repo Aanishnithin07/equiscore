@@ -30,7 +30,7 @@ export const AnalyticsPage: React.FC = () => {
                 </motion.div>
                 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                    <TrackViolinChart tracks={[{ id: 'h', name: 'Health', type: 'health', metrics: {min: 0, max: 100, median: 80}, distribution: distData }]} />
+                    <TrackViolinChart tracks={[{ id: 'h', name: 'Health', type: 'health', metrics: {min: 0, max: 100, median: 80}, distribution: distData.map(d => ({ score: d.score, value: d.count })) }]} />
                 </motion.div>
             </div>
 

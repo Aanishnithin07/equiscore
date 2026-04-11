@@ -45,7 +45,7 @@ export const InvitesTable: React.FC<Props> = ({ invites, onRevoke }) => {
                 </div>
 
                 <div className="w-[120px] flex items-center justify-center">
-                    {inv.status === 'accepted' ? <Badge variant="success">Accepted</Badge> : inv.status === 'revoked' ? <Badge variant="error" className="opacity-50">Revoked</Badge> : <Badge variant="warning">Pending</Badge>}
+                    {inv.status === 'accepted' ? <Badge variant="success">Accepted</Badge> : inv.status === 'revoked' ? <Badge variant="danger" className="opacity-50">Revoked</Badge> : <Badge variant="warning">Pending</Badge>}
                 </div>
 
                 <div className="w-[140px] flex items-center justify-center font-sans text-[12px] text-[var(--text-secondary)]">

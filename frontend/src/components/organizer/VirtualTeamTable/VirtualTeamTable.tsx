@@ -1,8 +1,9 @@
 // frontend/src/components/organizer/VirtualTeamTable/VirtualTeamTable.tsx
 import React, { useRef, useState, useEffect } from 'react';
-import { VariableSizeList as List } from 'react-window';
+import * as ReactWindow from 'react-window';
+const List = ReactWindow.VariableSizeList as any;
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, FileText, CheckCircle, XCircle, Search, CustomProgressRing } from 'lucide-react'; // Mocking some icons
+import { Eye, FileText, CheckCircle, XCircle, Search } from 'lucide-react'; // Mocking some icons
 import { ScoreRing } from '../../ds/ScoreRing/ScoreRing';
 import { Badge } from '../../ds/Badge/Badge';
 import { Button } from '../../ds/Button/Button';
@@ -55,7 +56,7 @@ export const VirtualTeamTable: React.FC<Props> = ({ data, selectedIds, onToggleS
     switch (s) {
       case 'evaluated': return <Badge variant="success">Evaluated</Badge>;
       case 'advanced': return <Badge variant="accent">Advanced</Badge>;
-      case 'rejected': return <Badge variant="error">Rejected</Badge>;
+      case 'rejected': return <Badge variant="danger">Rejected</Badge>;
       case 'processing': return <Badge variant="warning">Processing...</Badge>;
       default: return <Badge variant="neutral">Unscored</Badge>;
     }
@@ -123,7 +124,7 @@ export const VirtualTeamTable: React.FC<Props> = ({ data, selectedIds, onToggleS
             </div>
 
             <div className="w-[80px] shrink-0 flex justify-center">
-              {team.behavioral ? <ScoreRing score={team.behavioral} size="xs" hideLabel /> : <span className="text-[var(--text-tertiary)]">—</span>}
+              {team.behavioral ? <ScoreRing score={team.behavioral} size="sm" /> : <span className="text-[var(--text-tertiary)]">—</span>}
             </div>
 
             <div className="w-[120px] shrink-0 flex justify-center">

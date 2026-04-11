@@ -48,8 +48,8 @@ const ToastItem: React.FC<{ toast: ToastConfig; index: number; removeToast: (id:
         scale,
         filter: `blur(${blurVal}px)`
       }}
-      exit={{ opacity: 0, x: 100, transition: { ease: [0.7, 0, 0.84, 0], duration: 0.2 } }}
-      transition={spring.bouncy}
+      exit={{ opacity: 0, scale: 0.8, y: 20 }}
+      transition={spring.bouncy as any}
       style={{
         position: 'absolute',
         bottom: 0,

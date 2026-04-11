@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Search, Filter, Download, X } from 'lucide-react';
+import { Filter, Download, X, Search } from 'lucide-react';
 import { VirtualTeamTable, TableTeamData } from '../../components/organizer/VirtualTeamTable/VirtualTeamTable';
 import { FloatingBulkActionBar } from '../../components/organizer/FloatingBulkActionBar/FloatingBulkActionBar';
 import { Button } from '../../components/ds/Button/Button';
-import { useWindowSize } from 'react-use'; // Common safe hook assumption, will shim
 
 // Stub mockdata
 const MOCK_TEAMS: TableTeamData[] = Array.from({ length: 50 }).map((_, i) => ({
@@ -32,9 +31,11 @@ export const TeamsManagePage: React.FC = () => {
 
   // Dimensions
   const [containerHeight, setContainerHeight] = useState(600); 
-  const containerRef = React.useCallback((node: HTMLDivElement) => {
-    if (node !== null) {
-      setContainerHeight(node.getBoundingClientRect().height - 72); // Subtract header height
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (containerRef.current) {
+        setContainerHeight(containerRef.current.getBoundingClientRect().height - 72);
     }
   }, []);
 
@@ -121,7 +122,7 @@ export const TeamsManagePage: React.FC = () => {
             onToggleAll={handleToggleAll}
             expandedId={expanded}
             onToggleExpand={(id) => setExpanded(prev => prev === id ? null : id)}
-            width={containerRef ? (containerRef as any).current?.clientWidth || 1000 : 1000}
+            width={containerRef.current?.clientWidth || 1000}
             height={containerHeight} // Flexed remainder
         />
       </div>

@@ -1,6 +1,6 @@
 // frontend/src/components/organizer/ScoreDistributionChart/ScoreDistributionChart.tsx
 import React, { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { spring } from '../../../lib/motion-config';
 
 export interface ScoreBucket {

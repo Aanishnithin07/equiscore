@@ -17,9 +17,9 @@ export const Tooltip: React.FC<TooltipProps> = ({
   delayMS = 200
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleMouseEnter = () => {
+  const showTooltip = () => {
     timeoutRef.current = setTimeout(() => setIsVisible(true), delayMS);
   };
 
@@ -54,7 +54,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   return (
     <div 
       className="relative inline-block"
-      onMouseEnter={handleMouseEnter}
+      onMouseEnter={showTooltip}
       onMouseLeave={handleMouseLeave}
     >
       {children}
@@ -63,12 +63,11 @@ export const Tooltip: React.FC<TooltipProps> = ({
           <motion.div
             initial="hidden"
             animate="visible"
-            exit="hidden"
+            exit={{ opacity: 0, scale: 0.9, y: 2 }}
             variants={variants}
-            transition={spring.snappy}
-            style={getPositionStyles()}
+            transition={spring.snappy as any}
+            style={{ ...getPositionStyles(), pointerEvents: 'none' }}
             className="absolute z-50 glass-3 glass-noise px-3 py-1.5 rounded-md border border-gray-700 whitespace-nowrap shadow-xl"
-            pointerEvents="none"
           >
             <span className="text-[12px] font-sans font-medium text-gray-200 tracking-wide">
                 {content}
