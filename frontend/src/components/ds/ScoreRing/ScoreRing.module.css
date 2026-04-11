@@ -1,0 +1,56 @@
+/* frontend/src/components/ds/ScoreRing/ScoreRing.module.css */
+
+.ringContainer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Sizing maps mapping bounding boxes proportionally */
+.size-sm { width: 64px; height: 64px; }
+.size-md { width: 120px; height: 120px; }
+.size-lg { width: 180px; height: 180px; }
+.size-xl { width: 240px; height: 240px; }
+
+/* Font scaling mapped inside ring container */
+.size-sm .scoreText { font-size: var(--text-lg); }
+.size-md .scoreText { font-size: var(--text-2xl); }
+.size-lg .scoreText { font-size: var(--text-4xl); }
+.size-xl .scoreText { font-size: var(--text-5xl); }
+
+.scoreWrapper {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.scoreText {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  line-height: var(--leading-none);
+  letter-spacing: var(--tracking-normal);
+  transition: color 400ms var(--ease-out-expo);
+}
+
+.scoreSuffix {
+  font-family: 'DM Sans', sans-serif;
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+/* The SVG Ring Stroke Default */
+.track {
+  stroke: var(--border-default);
+  fill: none;
+}
+
+.fill {
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke 400ms var(--ease-out-expo);
+}

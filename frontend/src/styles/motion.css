@@ -1,0 +1,106 @@
+/* frontend/src/styles/motion.css */
+
+:root {
+  /* TIMING FUNCTIONS (cubic-bezier based) */
+  --ease-out-expo:   cubic-bezier(0.16, 1, 0.3, 1);    /* primary UI motion */
+  --ease-out-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* playful spring */
+  --ease-in-expo:    cubic-bezier(0.7, 0, 0.84, 0);     /* exit animations */
+  --ease-inout:      cubic-bezier(0.45, 0, 0.55, 1);    /* symmetric */
+  --ease-elastic:    cubic-bezier(0.25, 0.46, 0.45, 1.4); /* overshoot */
+
+  /* DURATION SCALE */
+  --duration-instant: 80ms;   /* micro: checkbox, radio toggle */
+  --duration-fast:    150ms;  /* hover states, color changes */
+  --duration-normal:  250ms;  /* most UI transitions */
+  --duration-slow:    400ms;  /* modal open, panel slide */
+  --duration-slower:  600ms;  /* page transitions */
+  --duration-scene:   1000ms; /* score ring fill, dramatic reveals */
+}
+
+/* KEYFRAME LIBRARY */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes shimmer {
+  from { background-position: -200% center; }
+  to   { background-position: 200% center; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 12px var(--accent-glow); }
+  50%      { box-shadow: 0 0 32px var(--accent-glow), 0 0 64px var(--accent-glow); }
+}
+
+@keyframes spinSmooth {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes numberRoll {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.03); }
+}
+
+@keyframes textReveal {
+  from { clip-path: inset(0 100% 0 0); opacity: 0; }
+  to   { clip-path: inset(0 0% 0 0);   opacity: 1; }
+}
+
+@keyframes borderGlow {
+  0%, 100% { border-color: var(--border-subtle); }
+  50%      { border-color: var(--accent-400); box-shadow: 0 0 12px var(--accent-glow); }
+}
+
+@keyframes scoreCountUp {
+  from { counter-increment: score 0; }
+  to   { counter-increment: score var(--score-value); }
+}
+
+/* STAGGER UTILITIES */
+.stagger-children > * { animation-fill-mode: both; }
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+
+/* ACCESSIBILITY: Disable animations for prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,55 @@
+/* frontend/src/components/ds/Badge/Badge.module.css */
+
+.badgeBase {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.size-sm {
+  padding: 2px 6px;
+  font-size: 9px;
+  border-radius: 4px;
+}
+
+.size-md {
+  padding: 4px 8px;
+  font-size: 10px;
+}
+
+/* Variants */
+.neutral {
+  background: var(--bg-overlay);
+  color: var(--text-secondary);
+  border: 0.5px solid var(--border-subtle);
+}
+
+.success {
+  background: oklch(72% 0.140 185 / 0.1);
+  color: var(--teal-400);
+  border: 0.5px solid oklch(72% 0.140 185 / 0.3);
+}
+
+.warning {
+  background: oklch(78% 0.160 70 / 0.1);
+  color: var(--amber-400);
+  border: 0.5px solid oklch(78% 0.160 70 / 0.3);
+}
+
+.danger {
+  background: oklch(68% 0.160 28 / 0.1);
+  color: var(--coral-400);
+  border: 0.5px solid oklch(68% 0.160 28 / 0.3);
+}
+
+.accent {
+  background: oklch(64% 0.180 282 / 0.1);
+  color: var(--accent-400);
+  border: 0.5px solid oklch(64% 0.180 282 / 0.3);
+}

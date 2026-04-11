@@ -1,0 +1,121 @@
+/* frontend/src/styles/tokens.css */
+
+@property --bg-surface { syntax: '<color>'; inherits: false; initial-value: oklch(12% 0.012 272); }
+@property --bg-elevated { syntax: '<color>'; inherits: false; initial-value: oklch(16% 0.014 270); }
+@property --border-default { syntax: '<color>'; inherits: false; initial-value: oklch(100% 0 0 / 0.12); }
+@property --accent-400 { syntax: '<color>'; inherits: false; initial-value: oklch(64% 0.180 282); }
+
+:root {
+  /* ── CORE OKLCH PALETTE ── */
+
+  /* Void backgrounds — layered depth */
+  --bg-void:      oklch(6% 0.008 280);   /* #05050F — deepest layer */
+  --bg-base:      oklch(9% 0.010 275);   /* #0B0B17 — main canvas */
+  --bg-surface:   oklch(12% 0.012 272);  /* #111120 — card surface */
+  --bg-elevated:  oklch(16% 0.014 270);  /* #191929 — raised elements */
+  --bg-overlay:   oklch(20% 0.016 268);  /* #202035 — hover states */
+  --bg-inverse:   oklch(96% 0.004 280);  /* #F4F4F8 — inverse surfaces */
+
+  /* Borders — atmospheric layers */
+  --border-ghost:   oklch(100% 0 0 / 0.04);  /* barely visible */
+  --border-subtle:  oklch(100% 0 0 / 0.08);  /* card edges */
+  --border-default: oklch(100% 0 0 / 0.12);  /* interactive borders */
+  --border-strong:  oklch(100% 0 0 / 0.20);  /* active/focus */
+  --border-accent:  oklch(100% 0 0 / 0.35);  /* CTA borders */
+
+  /* Text — typographic hierarchy */
+  --text-primary:   oklch(96% 0.008 280);    /* near white */
+  --text-secondary: oklch(70% 0.012 275);    /* readable muted */
+  --text-tertiary:  oklch(50% 0.010 272);    /* hints */
+  --text-disabled:  oklch(35% 0.008 270);    /* disabled states */
+  --text-inverse:   oklch(8% 0.008 280);     /* on light backgrounds */
+
+  /* Accent — Violet Primary */
+  --accent-50:  oklch(97% 0.018 290);
+  --accent-100: oklch(92% 0.040 288);
+  --accent-200: oklch(84% 0.080 286);
+  --accent-300: oklch(74% 0.130 284);
+  --accent-400: oklch(64% 0.180 282);   /* primary CTA */
+  --accent-500: oklch(55% 0.210 280);   /* hover */
+  --accent-600: oklch(46% 0.190 278);   /* active */
+  --accent-glow: oklch(64% 0.180 282 / 0.25); /* glow effect */
+
+  /* Teal — Success / Strengths */
+  --teal-400: oklch(72% 0.140 185);
+  --teal-500: oklch(62% 0.160 183);
+  --teal-glow: oklch(72% 0.140 185 / 0.20);
+
+  /* Coral — Warning / Weaknesses */
+  --coral-400: oklch(68% 0.160 28);
+  --coral-500: oklch(58% 0.175 26);
+  --coral-glow: oklch(68% 0.160 28 / 0.20);
+
+  /* Amber — Caution / Processing */
+  --amber-400: oklch(78% 0.160 70);
+  --amber-500: oklch(68% 0.170 68);
+  --amber-glow: oklch(78% 0.160 70 / 0.20);
+
+  /* ── SEMANTIC TOKENS ── */
+  --color-cta:       var(--accent-400);
+  --color-cta-hover: var(--accent-500);
+  --color-success:   var(--teal-400);
+  --color-danger:    var(--coral-400);
+  --color-warning:   var(--amber-400);
+
+  /* ── SPACING SCALE (8pt grid) ── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ── BORDER RADIUS ── */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-xl:   24px;
+  --radius-2xl:  32px;
+  --radius-full: 9999px;
+
+  /* ── SHADOWS — multi-layer with color ── */
+  --shadow-sm:
+    0 1px 2px oklch(0% 0 0 / 0.40),
+    0 0 0 0.5px var(--border-subtle);
+
+  --shadow-md:
+    0 4px 6px oklch(0% 0 0 / 0.35),
+    0 1px 3px oklch(0% 0 0 / 0.40),
+    0 0 0 0.5px var(--border-subtle);
+
+  --shadow-lg:
+    0 10px 15px oklch(0% 0 0 / 0.35),
+    0 4px 6px oklch(0% 0 0 / 0.40),
+    0 0 0 0.5px var(--border-subtle);
+
+  --shadow-xl:
+    0 20px 25px oklch(0% 0 0 / 0.45),
+    0 8px 10px oklch(0% 0 0 / 0.40),
+    0 0 0 0.5px var(--border-subtle);
+
+  /* Glow shadows — add presence to interactive elements */
+  --glow-accent: 0 0 24px var(--accent-glow), 0 0 48px var(--accent-glow);
+  --glow-teal:   0 0 20px var(--teal-glow);
+  --glow-coral:  0 0 20px var(--coral-glow);
+  --glow-amber:  0 0 20px var(--amber-glow);
+
+  /* Inner glow — frosted glass inner border simulation */
+  --inset-glow: inset 0 1px 0 oklch(100% 0 0 / 0.06),
+                inset 0 -1px 0 oklch(0% 0 0 / 0.20);
+
+  /* ── BLUR VALUES ── */
+  --blur-glass:  blur(16px) saturate(180%);
+  --blur-heavy:  blur(40px) saturate(200%);
+  --blur-subtle: blur(8px) saturate(150%);
+}

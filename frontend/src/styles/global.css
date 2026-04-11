@@ -1,0 +1,67 @@
+/* frontend/src/styles/global.css */
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-void);
+  color: var(--text-primary);
+  min-height: 100vh;
+  /* CUSTOM CURSOR: hidden natively as we will map JS overlay */
+  cursor: none;
+}
+
+/* Make link cursor hidden too if we do custom */
+a, button, [role="button"], input, select, textarea {
+  cursor: none;
+}
+
+/* CUSTOM SCROLLBAR */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: var(--radius-full);
+  transition: background var(--duration-fast) ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+/* TEXT SELECTION */
+::selection {
+  background: var(--accent-400);
+  color: var(--text-inverse);
+}
+
+/* FOCUS RING (keyboard navigation) */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg-base),
+              0 0 0 4px var(--accent-400),
+              0 0 12px var(--accent-glow);
+}
+
+/* LOADING STATES — skeleton shimmer */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-elevated) 25%,
+    oklch(22% 0.016 268) 50%,
+    var(--bg-elevated) 75%
+  );
+  background-size: 200% auto;
+  animation: shimmer 1.8s ease infinite;
+}

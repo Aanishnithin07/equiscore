@@ -1,0 +1,130 @@
+/* frontend/src/components/ds/Button/Button.module.css */
+
+.buttonBase {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  cursor: none; /* Rely entirely on custom cursor tracking */
+  user-select: none;
+  overflow: hidden; /* For shimmer layers */
+  transition: all 200ms var(--ease-out-expo);
+}
+
+/* Base Sizes */
+.size-sm { height: 32px; padding: 0 12px; font-size: 13px; }
+.size-md { height: 40px; padding: 0 20px; font-size: 14px; }
+.size-lg { height: 48px; padding: 0 24px; font-size: 15px; }
+.size-xl { height: 56px; padding: 0 32px; font-size: 16px; border-radius: var(--radius-lg); }
+
+/* Icon Square Overrides */
+.iconOnly { padding: 0 !important; width: var(--resolved-height); }
+.iconOnly.size-sm { width: 32px; }
+.iconOnly.size-md { width: 40px; }
+.iconOnly.size-lg { width: 48px; }
+.iconOnly.size-xl { width: 56px; }
+
+/* ── Primary Variant ── */
+.primary {
+  background: var(--accent-400);
+  border: none;
+  color: #FFFFFF;
+}
+
+.primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%);
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity 300ms, background-position 600ms;
+  pointer-events: none;
+}
+
+.primary:hover {
+  background: var(--accent-500);
+  box-shadow: var(--glow-accent);
+  transform: translateY(-1px);
+}
+
+.primary:hover::before {
+  opacity: 1;
+  animation: shineSweep 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.primary:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: none;
+  transition-duration: 80ms;
+}
+
+/* ── Ghost Variant ── */
+.ghost {
+  background: transparent;
+  border: 0.5px solid var(--border-default);
+  color: var(--text-secondary);
+}
+
+.ghost:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.ghost:active {
+  transform: translateY(0) scale(0.97);
+  background: var(--bg-overlay);
+  transition-duration: 80ms;
+}
+
+/* ── Danger Variant ── */
+.danger {
+  background: var(--coral-400);
+  border: none;
+  color: #FFFFFF;
+}
+
+.danger:hover {
+  background: var(--coral-500);
+  box-shadow: var(--glow-coral);
+  transform: translateY(-1px);
+}
+
+/* ── Loading States ── */
+.loading {
+  pointer-events: none;
+  animation: breathe 2s ease infinite;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  animation: svgSpin 1.2s linear infinite;
+}
+
+.spinner circle {
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-dasharray: 50 50;
+  fill: none;
+  stroke-linecap: round;
+}
+
+@keyframes shineSweep {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes svgSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

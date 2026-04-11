@@ -1,0 +1,56 @@
+/* frontend/src/components/ds/Card/Card.module.css */
+
+.cardBase {
+  position: relative;
+  overflow: hidden;
+  transition: all 200ms var(--ease-out-expo);
+  color: var(--text-primary);
+}
+
+.radius-lg { border-radius: var(--radius-lg); }
+.radius-xl { border-radius: var(--radius-xl); }
+
+/* Hover physics */
+.hoverable:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+}
+
+/* Glow Prop via CSS Custom Properties dynamically or injected class */
+.glowActive:hover {
+  box-shadow: 0 0 24px var(--card-glow-color, var(--accent-glow));
+}
+
+/* Accent Bars */
+.accent-top::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--accent-400), var(--teal-400));
+}
+
+.accent-left::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--accent-400), transparent);
+}
+
+/* Inner Layout Components */
+.cardHeader {
+  padding: 20px 24px 0;
+  border-bottom: 0.5px solid var(--border-ghost);
+}
+
+.cardBody {
+  padding: 20px 24px;
+}
+
+.cardFooter {
+  padding: 0 24px 20px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
