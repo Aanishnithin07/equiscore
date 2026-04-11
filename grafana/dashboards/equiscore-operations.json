@@ -1,0 +1,37 @@
+{
+  "__inputs": [],
+  "__requires": [],
+  "title": "EquiScore Operations Overview",
+  "uid": "1",
+  "tags": ["DevOps", "API Latency"],
+  "panels": [
+    {
+      "title": "Request Rate (RPS)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(http_requests_total[1m])",
+          "legendFormat": "{{method}} {{path}}"
+        }
+      ]
+    },
+    {
+      "title": "P95 Request Latency",
+      "type": "heatmap",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))"
+        }
+      ]
+    },
+    {
+      "title": "Queue Depth Backlogs",
+      "type": "gauge",
+      "targets": [
+        {
+          "expr": "celery_tasks_total{status='pending'}"
+        }
+      ]
+    }
+  ]
+}

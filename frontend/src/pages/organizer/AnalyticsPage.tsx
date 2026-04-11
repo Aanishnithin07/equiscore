@@ -3,8 +3,18 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, PieChart, BarChart } from 'lucide-react';
 import { ScoreDistributionChart } from '../../components/organizer/ScoreDistributionChart';
 import { TrackBreakdownChart } from '../../components/organizer/TrackBreakdownChart';
+import { BiasAuditSection } from '../../components/organizer/BiasAuditSection';
+import { useAuthStore } from '../../stores/authStore';
 
 export const AnalyticsPage: React.FC = () => {
+    const token = useAuthStore(state => state.accessToken);
+    let hackathonId = 'dummy-fallback';
+    if (token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            hackathonId = payload.hack_id || payload.sub || '';
+        } catch (e) {}
+    }
     
     // Mock robust distribution
     const scoreData = [
@@ -39,10 +49,14 @@ export const AnalyticsPage: React.FC = () => {
 
             <main className="max-w-6xl mx-auto py-12 px-6">
                 
-                <header className="mb-12">
+                <header className="mb-8">
                     <h2 className="text-3xl font-bold text-white mb-2">Metrics Dashboard</h2>
                     <p className="text-slate-400">Holistic overview of submission quality, AI scoring parity, and event distribution.</p>
                 </header>
+
+                <div className="mb-12">
+                    <BiasAuditSection hackathonId={hackathonId} />
+                </div>
 
                 <div className="grid lg:grid-cols-2 gap-8">
                     {/* Score Distribution */}

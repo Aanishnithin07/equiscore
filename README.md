@@ -1,67 +1,57 @@
-# EquiScore
+# EquiScore Platform
 
-**EquiScore** is an Auditable AI platform designed to eliminate bias and opacity in hackathon judging. It acts as a "Pro-Level Judge's Copilot" during the live pitching stage. 
-
-Hackathon judges use the tablet-optimized frontend to view live leaderboard rankings and receive AI-generated technical evaluations of pitch decks, complete with rubric breakdowns and suggested Q&A. Crucially, the platform enforces human-in-the-loop validation, allowing judges to override AI scores while recording definitive, immutable audit trails.
-
-## 🚀 Architecture
-
-The project consists of three main systems interacting asynchronously:
-
-1. **Backend API (`FastAPI`)**: Handles file uploading, state management, and real-time polling endpoints.
-2. **Task Workers (`Celery` + `Redis`)**: Securely handles PDF extraction (`PyMuPDF`) and calls out to OpenAI (`gpt-4o`) while enforcing strict JSON response schematics to evaluate track-specific rubrics.
-3. **Frontend Dashboard (`React 18` + `Tailwind` + `Framer Motion`)**: A dark-mode, glassmorphism UI using Zustand for fast local judge-override caching and React Query for polling live scores. Data is visualized via custom SVGs.
-
-*Data is durably stored in PostgreSQL 16 utilizing JSONB columns for the LLM audit trails.*
+EquiScore is an auditable AI platform eliminating bias and opacity in hackathon judging. It offers dynamic submission validation, automated evaluation scoring using sophisticated prompt extraction rubrics, continuous analytics tracking with SciPy distributions, and deep real-time feedback bridging via WebSockets.
 
 ---
 
-## 🛠️ Local Development Setup
+## 🚀 Local Development Setup
 
-### 1. Backend Setup
-
-The backend relies on PostgreSQL, Redis, and OpenAI. The easiest way to get started is using the provided Docker compose file for infrastructure.
+To test the application locally effortlessly with all background queuing, databases, and caches configured automatically:
 
 ```bash
-cd backend
-cp .env.example .env
-# Important: Fill in your OPENAI_API_KEY inside the new .env file
-
-# Start the infrastructure and the backend natively (or use docker for everything)
-docker-compose up -d postgres redis
-
-# Native python setup
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# Run migrations
-alembic upgrade head
-
-# Start API
-uvicorn main:app --reload --port 8000
-
-# Open a new terminal to start the Celery worker
-celery -A tasks.celery_app worker --loglevel=info
+docker-compose up -d --build
 ```
+> Running this boots out Postgres equipped with pgvector, Redis, FastAPI engines mapping live hot-reloads, and Celery tracking endpoints natively.
 
-### 2. Frontend Setup
+## 🔐 Environment Variables
 
-The frontend expects the backend to be running on `http://localhost:8000`.
+Reference the root `.env.example` explicitly which sets mock identifiers bypassing explicit constraints natively:
+- `DATABASE_URL`: Connection bridge mapping to `postgresql+asyncpg`
+- `OPENAI_API_KEY`: Required AI Engine matrix extraction API
+- `SECRET_KEY`: Used securely generating JWT signatures implicitly
+- `SENDGRID_API_KEY`: (Optional) Transports templates natively otherwise relies on SMTP setups.
+- `SENTRY_DSN`: (Optional) Connects stack-traces into analytical interfaces manually.
 
-```bash
-cd frontend
-cp .env.example .env
+## 🛡 API Endpoints Reference 
 
-npm install
-npm run dev
-```
-Navigate to `http://localhost:5173` to view the dashboard.
+The application utilizes strict REST principles guarded fully utilizing RBAC access keys injected safely via Bearer JWT formats natively. Below are primary hubs:
 
-## 🗄️ Component Structure
+### Authentication
+- `POST /api/v1/auth/login`: Issue dual token responses
+- `POST /api/v1/auth/register`: Generate users globally safely
 
-### Track-Aware Engine
-Pitches are evaluated strictly against predefined rubrics based on their track (e.g., *Healthcare*, *AI/ML*, *Open Innovation*). The LLM is forced to return deterministic weights and scores.
+### Evaluations
+- `POST /api/v1/evaluation/pitch`: Securely extracts multipart `.pdf` mappings against track expectations
+- `GET /api/v1/evaluation/{job_id}`: Track exact evaluation progress states manually
 
-### Auditability
-Every score override by a human judge requires explicitly clicking the `LOCK IN SCORE` button, which averages the AI's pre-score with the Human's intuition score and writes a permanent log to the database alongside the Judge's private validation notes.
+### Administration & Safety
+- `GET /api/v1/audit/{hackathon_id}/bias-report`: Return SciPy Pearson testing checking algorithmic parity.
+- `GET /api/v1/plagiarism/{hackathon_id}/report`: Returns Vector comparisons exceeding cosine boundaries cleanly.
+
+*For all 25+ endpoints see the auto-generated Swagger UI exposed dynamically at `/docs` upon boot.*
+
+## 🐳 Deployment Guide
+
+Deployment is entirely orchestrated via structured zero-trust Docker files pushing natively via GitHub CI/CD:
+
+1. Push feature commits targeting `main`.
+2. The Action pipeline `ci.yml` strictly enforces testing and security traces (Trivy).
+3. Post test confirmation, `deploy.yml` triggers pushing multi-stage builds automatically routing them globally.
+4. NGINX Reverse Proxies strictly proxy all HTTP traffic securely through rate limiting endpoints cleanly maintaining Websocket heartbeats securely up to 24h explicitly.
+
+## 📐 Architecture Decisions
+
+- **FastAPI / AsyncPG**: Maximum network throughput scaling vertically on limited compute architectures smoothly handling file uploads implicitly.
+- **Celery + Redis Hub**: Background evaluation tasks consume AI API tokens smoothly preventing rate limits on main threads cleanly. Redis natively handles message fan-out for real-time WebSocket state distributions natively.
+- **React + Zustand**: Minimal client-side footprint eliminating heavy global contexts favoring localized atomic interactions (Query mapping smoothly).
+- **SciPy / Vector Storage**: Eliminates traditional naive rules testing instead offering dense semantic mathematics proving objectivity empirically to organizers dynamically.

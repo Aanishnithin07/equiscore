@@ -22,6 +22,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+
+from prometheus_fastapi_instrumentator import Instrumentator
+import sentry_sdk
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.celery import CeleryIntegration
+from prometheus_client import Counter, Histogram, Gauge
+
+evaluations_submitted_total = Counter("evaluations_submitted_total", "Total evaluations submitted", ["hackathon_id", "track"])
+evaluations_completed_total = Counter("evaluations_completed_total", "Total completed", ["hackathon_id", "track", "status"])
+evaluation_processing_duration_seconds = Histogram("evaluation_processing_duration_seconds", "Duration", buckets=[5, 10, 20, 30, 60, 120])
+llm_api_calls_total = Counter("llm_api_calls_total", "Total API calls", ["model", "endpoint"])
+llm_api_duration_seconds = Histogram("llm_api_duration_seconds", "Duration", ["model"])
+websocket_connections_active = Gauge("websocket_connections_active", "Active WebSockets", ["hackathon_id"])
+plagiarism_flags_total = Counter("plagiarism_flags_total", "Flags Count", ["hackathon_id", "severity"])
+
 from api.v1.routes.auth import limiter
 
 from api.v1 import v1_router
@@ -163,6 +178,17 @@ def create_app() -> FastAPI:
     # ── Configure logging first ───────────────────────────────────────
     configure_logging()
 
+    # ── Sentry Init ───────────────────────────────────────────────────
+    if settings.SENTRY_DSN:
+        sentry_sdk.init(
+            dsn=settings.SENTRY_DSN.get_secret_value(),
+            integrations=[FastApiIntegration(), CeleryIntegration()],
+            traces_sample_rate=0.1,
+            profiles_sample_rate=0.05,
+            environment=settings.ENVIRONMENT,
+            release=settings.APP_VERSION,
+        )
+
     # ── Create FastAPI instance ────────────────────────────────────────
     app = FastAPI(
         title=settings.APP_NAME,
@@ -194,6 +220,9 @@ def create_app() -> FastAPI:
 
     # ── Register API Routes ───────────────────────────────────────────
     app.include_router(v1_router)
+
+    # ── Prometheus Instrumentation ────────────────────────────────────
+    Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
     # ── Health Check ──────────────────────────────────────────────────
     @app.get(

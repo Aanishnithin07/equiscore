@@ -2,3 +2,4 @@
 
 from .embedding import SubmissionEmbedding
 from .similarity import SimilarityResult
+from .audit import BiasAuditRun

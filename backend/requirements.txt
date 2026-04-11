@@ -55,3 +55,8 @@ numpy==1.26.4
 sendgrid==6.11.0
 aiosmtplib==3.0.1
 websockets==12.0
+
+# --- Phase 8 Additions ---
+scipy==1.13.0
+sentry-sdk[fastapi,celery]==1.45.0
+prometheus-fastapi-instrumentator==7.0.0

@@ -1,0 +1,28 @@
+{
+  "__inputs": [],
+  "__requires": [],
+  "title": "EquiScore Business Insights",
+  "uid": "2",
+  "tags": ["Business", "Plagiarism", "Financials"],
+  "panels": [
+    {
+      "title": "LLM Cost Estimation (Live)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(rate(llm_api_calls_total[1h])) * 0.03",
+          "legendFormat": "Burn Rate ($/hr)"
+        }
+      ]
+    },
+    {
+      "title": "Plagiarism Trigger Spikes",
+      "type": "bargauge",
+      "targets": [
+        {
+          "expr": "rate(plagiarism_flags_total[10m])"
+        }
+      ]
+    }
+  ]
+}

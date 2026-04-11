@@ -1,0 +1,86 @@
+name: EquiScore CI Pipeline
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: equiscore_test
+          POSTGRES_PASSWORD: pass
+          POSTGRES_DB: equiscore_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          
+      - name: Install Dependencies
+        working-directory: ./backend
+        run: pip install -r requirements.txt
+        
+      - name: Run Schema Assertions
+        working-directory: ./backend
+        run: alembic upgrade head
+        env:
+          DATABASE_URL: postgresql+asyncpg://equiscore_test:pass@localhost:5432/equiscore_test
+          OPENAI_API_KEY: "mock_test_key"
+          SECRET_KEY: "mock_test_key_extremely_long_minimum_bytes"
+
+      - name: Pytest Execution (Fail Fast)
+        working-directory: ./backend
+        run: pytest -x
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          
+      - name: Install Dependencies
+        working-directory: ./frontend
+        run: npm ci
+        
+      - name: Type Check TS Compiler
+        working-directory: ./frontend
+        run: npm run type-check
+
+      - name: Frontend Build Verification
+        working-directory: ./frontend
+        run: npm run build
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivy Filesystem Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'

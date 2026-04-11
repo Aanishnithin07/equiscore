@@ -165,5 +165,10 @@ export const api = {
   redeemInvite: async (token: string, teamName?: string): Promise<{message: string; hackathon_id: string; role: string}> => {
     const { data } = await apiClient.post('/invites/redeem', { token, team_name: teamName });
     return data;
+  },
+
+  getBiasReport: async (hackathonId: string, forceRerun: boolean = false): Promise<any> => {
+    const { data } = await apiClient.get(`/audit/${hackathonId}/bias-report`, { params: { force_rerun: forceRerun }});
+    return data;
   }
 };

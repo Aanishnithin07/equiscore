@@ -1,0 +1,24 @@
+FROM python:3.12-slim as base
+WORKDIR /app
+
+# System deps for WeasyPrint, PyMuPDF, psycopg2
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential libpango-1.0-0 libpangoft2-1.0-0 \
+    libffi-dev libglib2.0-0 libcairo2 libpangocairo-1.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY backend/ .
+
+# Create non-root user securely isolated (zero-trust prod constraints)
+RUN adduser --disabled-password --gecos '' appuser && chown -R appuser /app
+USER appuser
+
+# Health check verifies the live web layer effectively resolving local loopbacks
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", \
+     "--workers", "4", "--log-level", "info"]

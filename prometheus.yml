@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'equiscore-api'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['api:8000']
+  - job_name: 'redis'
+    static_configs:
+      # Targets redis-exporter natively translating raw redis logic into Prometheus format natively
+      - targets: ['redis:9121']

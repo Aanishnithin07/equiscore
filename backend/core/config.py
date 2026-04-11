@@ -110,6 +110,14 @@ class Settings(BaseSettings):
         default="EquiScore",
         description="Application name for logging and metadata",
     )
+    ENVIRONMENT: str = Field(
+        default="development",
+        description="Deployment environment indicator"
+    )
+    SENTRY_DSN: Optional[SecretStr] = Field(
+        default=None,
+        description="Optional tracking metric URL binding"
+    )
     APP_VERSION: str = Field(
         default="1.0.0",
         description="Application version string",
