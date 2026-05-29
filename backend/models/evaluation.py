@@ -14,7 +14,7 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import (
+from sqlalchemy import ( 
     Boolean,
     DateTime,
     Enum,
