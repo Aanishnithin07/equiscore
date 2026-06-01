@@ -9,8 +9,8 @@
       "title": "Request Rate (RPS)",
       "type": "timeseries",
       "targets": [
-        {
-          "expr": "rate(http_requests_total[1m])",
+        { 
+          "expr": "rate(http_requests_total[1m])" ,
           "legendFormat": "{{method}} {{path}}"
         }
       ]
